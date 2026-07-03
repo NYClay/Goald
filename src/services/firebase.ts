@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, FirebaseApp } from 'firebase/app';
+import { getAuth, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
 import { isE2EMode } from '../config/runtime';
 
 const REQUIRED_VARS = [
@@ -12,13 +12,7 @@ const REQUIRED_VARS = [
   'EXPO_PUBLIC_FIREBASE_APP_ID',
 ] as const;
 
-if (!isE2EMode) {
-  for (const name of REQUIRED_VARS) {
-    if (!process.env[name]) {
-      throw new Error(`Missing required env var: ${name}`);
-    }
-  }
-}
+export const isFirebaseConfigured = REQUIRED_VARS.every((name) => !!process.env[name]);
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? '',
@@ -29,12 +23,16 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID ?? '',
 };
 
-// In normal mode this is always true (startup throws if any var is missing).
-// In E2E mode (startup check skipped) this is false, guarding against accidental Firebase calls.
-export const isFirebaseConfigured = REQUIRED_VARS.every(name => !!process.env[name]);
+const app = isE2EMode ? undefined : initializeApp(firebaseConfig);
 
-const app = isE2EMode ? ({} as ReturnType<typeof initializeApp>) : initializeApp(firebaseConfig);
-
-export const auth = isE2EMode ? ({} as ReturnType<typeof getAuth>) : getAuth(app);
-export const db = isE2EMode ? ({} as ReturnType<typeof getFirestore>) : getFirestore(app);
+export const auth = isE2EMode ? undefined : getAuth(app!);
+export const db = isE2EMode ? undefined : getFirestore(app!);
 export default app;
+
+export function assertFirebaseConfigured() {
+  if (!isE2EMode && !isFirebaseConfigured) {
+    throw new Error(
+      'Firebase is not configured. Set EXPO_PUBLIC_FIREBASE_* environment variables.'
+    );
+  }
+}

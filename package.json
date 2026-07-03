@@ -19,7 +19,14 @@
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' 'App.tsx' --fix",
     "typecheck": "tsc --noEmit",
     "test:unit": "node --import tsx --test tests/**/*.test.ts",
-    "admin:support": "node scripts/admin-support.mjs"
+    "admin:support": "node scripts/admin-support.mjs",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
@@ -52,6 +59,8 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-native": "^5.0.0",
     "firebase-admin": "^12.6.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.8",
     "playwright": "^1.52.0",
     "prettier": "^3.8.1",
     "tsx": "^4.20.6",
