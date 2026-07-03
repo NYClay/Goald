@@ -33,8 +33,8 @@ const firebaseConfig = {
 // In E2E mode (startup check skipped) this is false, guarding against accidental Firebase calls.
 export const isFirebaseConfigured = REQUIRED_VARS.every(name => !!process.env[name]);
 
-const app = initializeApp(firebaseConfig);
+const app = isE2EMode ? ({} as ReturnType<typeof initializeApp>) : initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const auth = isE2EMode ? ({} as ReturnType<typeof getAuth>) : getAuth(app);
+export const db = isE2EMode ? ({} as ReturnType<typeof getFirestore>) : getFirestore(app);
 export default app;

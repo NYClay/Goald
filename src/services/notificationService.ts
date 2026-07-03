@@ -11,13 +11,17 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
+try {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+  });
+} catch {
+  // Notifications API unavailable (web or unsupported environment)
+}
 
 export async function registerForPushNotificationsAsync(): Promise<string | null> {
   if (!Constants.isDevice) return null;
