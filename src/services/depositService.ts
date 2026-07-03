@@ -6,9 +6,9 @@ import {
   getDocs,
   onSnapshot,
   serverTimestamp,
-  Timestamp,
   QuerySnapshot,
 } from 'firebase/firestore';
+import { Deposit } from '../types';
 import { db } from './firebase';
 import { isE2EMode } from '../config/runtime';
 import {
@@ -16,15 +16,6 @@ import {
   e2eDepositsSubscribe,
   e2eGetDeposits,
 } from './e2eStore';
-
-export interface Deposit {
-  id: string;
-  goalId: string;
-  userId: string;
-  amount: number;
-  date: Timestamp;
-  note?: string;
-}
 
 export async function addDeposit(
   goalId: string,

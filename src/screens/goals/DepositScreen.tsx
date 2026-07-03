@@ -13,16 +13,16 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useAuth } from '../../hooks/useAuth';
 import { useGoals } from '../../hooks/useGoals';
+import { useStreak } from '../../hooks/useStreak';
 import { addDeposit } from '../../services/depositService';
 import { updateGoalBalance, markGoalCompleted } from '../../services/goalService';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
-import { db } from '../../services/firebase';
-import { computeEarnedBadges, BadgeId } from '../../utils/badges';
+import { saveUserStats } from '../../services/userStatsService';
+import { BadgeId } from '../../types';
+import { computeDepositStats } from '../../utils/depositUtils';
 import {
   sendMilestoneNotification,
   sendGoalCompletedNotification,
 } from '../../services/notificationService';
-import { isE2EMode } from '../../config/runtime';
 import { formatCurrency, parseNumberInput } from '../../utils/format';
 import { captureError, trackEvent } from '../../services/telemetryService';
 import { showToast } from '../../services/toastService';
@@ -37,6 +37,7 @@ export default function DepositScreen() {
   const { goalId } = route.params;
   const { user } = useAuth();
   const { goals } = useGoals(user?.uid ?? null);
+  const stats = useStreak(user?.uid ?? null);
 
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
@@ -58,13 +59,6 @@ export default function DepositScreen() {
     };
   }, [amount, goalId, note]);
 
-  function getCrossedMilestones(previousProgress: number, nextProgress: number): number[] {
-    const milestones = [25, 50, 75];
-    return milestones.filter(
-      (m) => previousProgress < m / 100 && nextProgress >= m / 100
-    );
-  }
-
   async function handleDeposit() {
     const depositAmount = parseNumberInput(amount);
     if (!depositAmount || depositAmount <= 0) {
@@ -78,71 +72,31 @@ export default function DepositScreen() {
       await addDeposit(goalId, user.uid, depositAmount, note);
       trackEvent('deposit_added', { amount: depositAmount, goalId });
 
-      const newBalance = goal.currentBalance + depositAmount;
-      await updateGoalBalance(goalId, newBalance);
+      const outcome = computeDepositStats({
+        currentBalance: goal.currentBalance,
+        targetAmount: goal.targetAmount,
+        depositAmount,
+        stats,
+        goalCount: goals.length,
+        existingBadges: stats.badges as BadgeId[],
+      });
 
-      const previousProgress = goal.targetAmount > 0 ? goal.currentBalance / goal.targetAmount : 0;
-      const nextProgress = goal.targetAmount > 0 ? newBalance / goal.targetAmount : 0;
-      const crossedMilestones = getCrossedMilestones(previousProgress, nextProgress);
+      await updateGoalBalance(goalId, outcome.newBalance);
 
-      // Update streak and badge stats (Firestore in normal mode, in-memory in e2e mode)
-      const isCompleted = newBalance >= goal.targetAmount;
-      const wasBelowHalfway = goal.currentBalance / goal.targetAmount < 0.5;
-      const isNowAtOrAboveHalfway = newBalance / goal.targetAmount >= 0.5;
-
-      if (!isE2EMode) {
-        const statsRef = doc(db, 'userStats', user.uid);
-        const statsSnap = await getDoc(statsRef);
-        const stats = statsSnap.data() ?? {
-          currentStreak: 0,
-          lastDepositMonth: '',
-          badges: [],
-          totalDeposits: 0,
-        };
-
-        const now = new Date();
-        const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        const lastMonth = stats.lastDepositMonth as string;
-
-        let newStreak = (stats.currentStreak as number) ?? 0;
-        if (lastMonth !== currentMonth) {
-          if (!lastMonth) {
-            newStreak = 1;
-          } else {
-            const last = new Date(lastMonth + '-01');
-            const diffMonths =
-              (now.getFullYear() - last.getFullYear()) * 12 + (now.getMonth() - last.getMonth());
-            newStreak = diffMonths === 1 ? newStreak + 1 : 1;
-          }
-        }
-
-        const newTotalDeposits = ((stats.totalDeposits as number) ?? 0) + 1;
-        const goalCount = goals.length;
-
-        const newBadges = computeEarnedBadges({
-          totalDeposits: newTotalDeposits,
-          currentStreak: newStreak,
-          goalCount,
-          hasHalfway: wasBelowHalfway && isNowAtOrAboveHalfway,
-          hasCompleted: isCompleted,
-          existingBadges: ((stats.badges ?? []) as BadgeId[]),
-        });
-
-        await updateDoc(statsRef, {
-          currentStreak: newStreak,
-          lastDepositMonth: currentMonth,
-          totalDeposits: newTotalDeposits,
-          badges: newBadges,
-        });
-      }
+      await saveUserStats(user.uid, {
+        currentStreak: outcome.newStreak,
+        lastDepositMonth: outcome.currentMonth,
+        totalDeposits: outcome.newTotalDeposits,
+        badges: outcome.newBadges,
+      });
 
       await Promise.all(
-        crossedMilestones.map((milestone) =>
+        outcome.crossedMilestones.map((milestone) =>
           sendMilestoneNotification(user.uid, goalId, goal.name, milestone).catch(() => {})
         )
       );
 
-      if (isCompleted && !goal.completedAt) {
+      if (outcome.isCompleted && !goal.completedAt) {
         trackEvent('goal_completed', { goalId });
         await sendGoalCompletedNotification(user.uid, goalId, goal.name).catch(() => {});
         await markGoalCompleted(goalId);

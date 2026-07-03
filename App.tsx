@@ -2,6 +2,7 @@ import 'react-native-gesture-handler';
 import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import AppNavigator from './src/navigation/AppNavigator';
+import ErrorBoundary from './src/components/ErrorBoundary';
 import ToastHost from './src/components/ToastHost';
 import { initializeGlobalErrorTracking } from './src/services/errorTrackingService';
 
@@ -11,10 +12,10 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <ErrorBoundary>
       <AppNavigator />
       <ToastHost />
       <StatusBar style="auto" />
-    </>
+    </ErrorBoundary>
   );
 }

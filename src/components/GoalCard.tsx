@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Goal } from '../services/goalService';
+import { Goal } from '../types';
 import ProgressBar from './ProgressBar';
 import MilestoneAnimation from './MilestoneAnimation';
 import { formatCurrency } from '../utils/format';

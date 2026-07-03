@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Deposit, subscribeDeposits } from '../services/depositService';
+import { Deposit } from '../types';
+import { subscribeDeposits } from '../services/depositService';
 
 export function useDeposits(goalId: string | null) {
   const [deposits, setDeposits] = useState<Deposit[]>([]);

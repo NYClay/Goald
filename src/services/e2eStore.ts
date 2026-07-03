@@ -1,8 +1,6 @@
 import { User } from 'firebase/auth';
 import { Timestamp } from 'firebase/firestore';
-import { Goal } from './goalService';
-import { Deposit } from './depositService';
-import { UserStats } from '../hooks/useStreak';
+import { Goal, Deposit, UserStats } from '../types';
 
 function fakeTimestamp(date: Date): Timestamp {
   return {

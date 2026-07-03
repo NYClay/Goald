@@ -1,10 +1,4 @@
-export type BadgeId =
-  | 'first_deposit'
-  | 'halfway'
-  | 'completed'
-  | 'streak_3'
-  | 'streak_6'
-  | 'multi_goal';
+import { BadgeId } from '../types';
 
 export interface Badge {
   id: BadgeId;

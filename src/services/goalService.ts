@@ -15,6 +15,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 
+import { Goal } from '../types';
 import { ThemeType } from '../types/Theme';
 import { isE2EMode } from '../config/runtime';
 import {
@@ -24,20 +25,6 @@ import {
   e2eGoalsSubscribe,
   e2eUpdateGoal,
 } from './e2eStore';
-
-export interface Goal {
-  id: string;
-  userId: string;
-  name: string;
-  targetAmount: number;
-  monthlyContribution: number;
-  annualInterestRate: number;
-  timelineMonths?: number;
-  visualTheme: ThemeType;
-  createdAt: Timestamp;
-  completedAt?: Timestamp;
-  currentBalance: number;
-}
 
 /** Typed shape of a goal document as stored in Firestore. */
 interface GoalDocData {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Goal, subscribeGoals } from '../services/goalService';
+import { Goal } from '../types';
+import { subscribeGoals } from '../services/goalService';
 
 export function useGoals(userId: string | null) {
   const [goals, setGoals] = useState<Goal[]>([]);

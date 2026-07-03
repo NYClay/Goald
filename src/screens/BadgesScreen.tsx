@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
 import { useStreak } from '../hooks/useStreak';
-import { ALL_BADGES, BadgeId } from '../utils/badges';
+import { BadgeId } from '../types';
+import { ALL_BADGES } from '../utils/badges';
 import BadgeItem from '../components/BadgeItem';
 
 export default function BadgesScreen() {
