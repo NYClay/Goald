@@ -14,7 +14,7 @@ import {
 import { db, assertFirebaseConfigured } from './firebase';
 import { isE2EMode } from '../config/runtime';
 import { Cave, CAVE_FURNITURE, FurnitureId } from '../types';
-import { e2eCreateCave, e2eGetCave, e2eGetCaves, e2eDepositToCave } from './e2eStore';
+import { e2eServices } from './e2eStore';
 
 export async function createCave(
   userId: string,
@@ -29,7 +29,7 @@ export async function createCave(
     createdAt: serverTimestamp() as Timestamp,
   };
 
-  if (isE2EMode) return e2eCreateCave(caveId, cave);
+  if (isE2EMode) return e2eServices.cave.createCave(userId, data);
   assertFirebaseConfigured();
 
   await setDoc(doc(db!, 'caves', caveId), cave);
@@ -37,7 +37,7 @@ export async function createCave(
 }
 
 export async function getCave(caveId: string): Promise<Cave | null> {
-  if (isE2EMode) return e2eGetCave(caveId);
+  if (isE2EMode) return e2eServices.cave.getCave(caveId);
   assertFirebaseConfigured();
 
   const snap = await getDoc(doc(db!, 'caves', caveId));
@@ -46,23 +46,20 @@ export async function getCave(caveId: string): Promise<Cave | null> {
 }
 
 export async function getUserCaves(userId: string): Promise<Cave[]> {
-  if (isE2EMode) return e2eGetCaves(userId);
+  if (isE2EMode) return e2eServices.cave.getUserCaves(userId);
   assertFirebaseConfigured();
 
   const q = query(collection(db!, 'caves'), where('userId', '==', userId));
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Cave);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }) as Cave);
 }
 
 export function subscribeUserCaves(userId: string, cb: (caves: Cave[]) => void): () => void {
-  if (isE2EMode) {
-    cb([]);
-    return () => {};
-  }
+  if (isE2EMode) return e2eServices.cave.subscribeUserCaves(userId, cb);
   assertFirebaseConfigured();
   const q = query(collection(db!, 'caves'), where('userId', '==', userId));
-  return onSnapshot(q, (snap) => {
-    cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Cave));
+  return onSnapshot(q, snap => {
+    cb(snap.docs.map(d => ({ id: d.id, ...d.data() }) as Cave));
   });
 }
 
@@ -70,7 +67,7 @@ export async function depositToCave(
   caveId: string,
   amountCents: number
 ): Promise<{ caveId: string; newFurniture: FurnitureId[]; completed: boolean }> {
-  if (isE2EMode) return e2eDepositToCave(caveId, amountCents);
+  if (isE2EMode) return e2eServices.cave.depositToCave(caveId, amountCents);
   assertFirebaseConfigured();
 
   const ref = doc(db!, 'caves', caveId);

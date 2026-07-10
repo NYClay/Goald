@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
-import { useBearContext } from '../context/BearContext';
+import { useAppContext } from '../context/AppContext';
 import BearCharacter from '../components/BearCharacter';
 import FeedModal from '../components/FeedModal';
 import { colors, spacing, radius, typography, shadows } from '../config/theme';
 import { getBearDisplayData, getCaveProgress } from '../utils/bearUtils';
 
 export default function DashboardScreen() {
-  const { bear, caves, mission, streak, loading, feed, completeMission } = useBearContext();
+  const { bear, caves, mission, streak, loading, feed, completeMission } = useAppContext();
   const [feedModalVisible, setFeedModalVisible] = React.useState(false);
 
   const displayData = bear ? getBearDisplayData(bear) : null;
@@ -55,7 +55,7 @@ export default function DashboardScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🔥 Streak: {streak.current} days</Text>
           <View style={styles.fireContainer}>
-            {[1, 2, 3, 4].map((level) => (
+            {[1, 2, 3, 4].map(level => (
               <View
                 key={level}
                 style={[styles.fireSegment, level <= streak.fireLevel && styles.fireActive]}
@@ -86,7 +86,7 @@ export default function DashboardScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.cavesScroll}
           >
-            {currentCaves.map((cave) => (
+            {currentCaves.map(cave => (
               <TouchableOpacity key={cave.id} style={styles.caveCard}>
                 <Text style={styles.caveName}>{cave.name}</Text>
                 <View style={styles.caveProgressBg}>

@@ -14,7 +14,7 @@ import {
 } from '../types';
 import { getBearDisplayData } from '../utils/bearUtils';
 
-interface BearContextValue {
+interface AppContextValue {
   bear: Bear | null;
   displayData: ReturnType<typeof getBearDisplayData> | null;
   caves: Cave[];
@@ -27,9 +27,9 @@ interface BearContextValue {
   refetch: () => void;
 }
 
-const BearContext = createContext<BearContextValue | null>(null);
+const AppContext = createContext<AppContextValue | null>(null);
 
-export function BearProvider({ children }: { children: ReactNode }) {
+export function AppProvider({ children }: { children: ReactNode }) {
   const { loading: authLoading } = useAuth();
   const { bear, loading: bearLoading, feed, displayData, refetch: refetchBear } = useBear();
   const { caves, loading: cavesLoading, deposit, refetch: refetchCaves } = useCaves();
@@ -37,7 +37,7 @@ export function BearProvider({ children }: { children: ReactNode }) {
 
   const loading = authLoading || bearLoading || cavesLoading || missionsLoading;
 
-  const value = useMemo<BearContextValue>(
+  const value = useMemo<AppContextValue>(
     () => ({
       bear,
       displayData,
@@ -68,11 +68,11 @@ export function BearProvider({ children }: { children: ReactNode }) {
     ]
   );
 
-  return <BearContext.Provider value={value}>{children}</BearContext.Provider>;
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
-export function useBearContext() {
-  const context = useContext(BearContext);
-  if (!context) throw new Error('useBearContext must be used within BearProvider');
+export function useAppContext() {
+  const context = useContext(AppContext);
+  if (!context) throw new Error('useAppContext must be used within AppProvider');
   return context;
 }

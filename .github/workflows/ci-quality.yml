@@ -29,3 +29,9 @@ jobs:
 
       - name: Type check
         run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Coverage check
+        run: npx c8 --check-coverage --lines 80 npm test

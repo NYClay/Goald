@@ -8,14 +8,13 @@ import {
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, assertFirebaseConfigured } from './firebase';
 import { isE2EMode } from '../config/runtime';
-import { e2eUser, e2eAuthSubscribe, e2eAuthLogin, e2eAuthLogout } from './e2eStore';
+import { e2eServices } from './e2eStore';
 
 export async function register(email: string, password: string): Promise<User> {
   assertFirebaseConfigured();
 
   if (isE2EMode) {
-    e2eAuthLogin();
-    return e2eUser as unknown as User;
+    return e2eServices.auth.register(email, password) as Promise<User>;
   }
 
   const cred = await createUserWithEmailAndPassword(auth!, email, password);
@@ -38,8 +37,7 @@ export async function login(email: string, password: string): Promise<User> {
   assertFirebaseConfigured();
 
   if (isE2EMode) {
-    e2eAuthLogin();
-    return e2eUser as unknown as User;
+    return e2eServices.auth.login(email, password) as Promise<User>;
   }
 
   const cred = await signInWithEmailAndPassword(auth!, email, password);
@@ -48,8 +46,7 @@ export async function login(email: string, password: string): Promise<User> {
 
 export async function logout(): Promise<void> {
   if (isE2EMode) {
-    e2eAuthLogout();
-    return;
+    return e2eServices.auth.logout();
   }
   assertFirebaseConfigured();
   await signOut(auth!);
@@ -57,7 +54,9 @@ export async function logout(): Promise<void> {
 
 export function onAuthChanged(cb: (user: User | null) => void): () => void {
   if (isE2EMode) {
-    return e2eAuthSubscribe(cb as (user: { uid: string; email: string }) => void);
+    return e2eServices.auth.onAuthChanged(
+      cb as (user: { uid: string; email: string | null } | null) => void
+    );
   }
   assertFirebaseConfigured();
   return onAuthStateChanged(auth!, cb);

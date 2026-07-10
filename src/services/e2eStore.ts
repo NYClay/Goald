@@ -1,4 +1,5 @@
-import { Bear, Streak, DailyMission, FurnitureId, CaveTheme, BadgeId } from '../types';
+import { Bear, Streak, DailyMission, FurnitureId, CaveTheme, BadgeId, Cave } from '../types';
+import { ServiceContract } from '../types/serviceContract';
 import { Timestamp } from 'firebase/firestore';
 
 const now = Date.now();
@@ -25,7 +26,7 @@ const mockBear: Bear = {
   updatedAt: mockTimestamp,
 };
 
-const mockCaves = [
+const mockCaves: Cave[] = [
   {
     id: 'cave_1',
     userId: 'e2e-user',
@@ -70,72 +71,90 @@ const mockStreak: Streak = {
 
 export const e2eUser = { uid: 'e2e-user', email: 'e2e@goald.local' };
 
-export function e2eCreateBear(bear: { id: string; userId: string; name: string }) {
-  return bear.id;
-}
+export const e2eServices: ServiceContract = {
+  bear: {
+    createBear(userId: string, _name: string) {
+      return Promise.resolve(`bear_${userId}`);
+    },
+    getBear(_bearId: string) {
+      return Promise.resolve(mockBear);
+    },
+    feedBear(_bearId: string, amountCents: number) {
+      const xpEarned = Math.floor(amountCents / 100);
+      mockBear.xp += xpEarned;
+      mockBear.level = Math.min(10, mockBear.level + (xpEarned > 500 ? 1 : 0));
+      mockBear.mood = 'ecstatic';
+      return Promise.resolve({
+        newXp: mockBear.xp,
+        newLevel: mockBear.level,
+        leveledUp: false,
+        newAccessories: [] as Bear['accessories'],
+        mood: 'ecstatic' as const,
+      });
+    },
+    subscribeBear(_bearId: string, _cb: (bear: Bear | null) => void) {
+      return () => {};
+    },
+  },
 
-export function e2eGetBear(_bearId: string) {
-  return mockBear;
-}
+  cave: {
+    createCave(
+      _userId: string,
+      _data: Omit<Cave, 'id' | 'userId' | 'createdAt' | 'furniture' | 'currentAmount'>
+    ) {
+      const caveId = `cave_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      return Promise.resolve(caveId);
+    },
+    getCave(caveId: string) {
+      return Promise.resolve(mockCaves.find(c => c.id === caveId) || null);
+    },
+    getUserCaves(_userId: string) {
+      return Promise.resolve(mockCaves);
+    },
+    depositToCave(caveId: string, amountCents: number) {
+      const cave = mockCaves.find(c => c.id === caveId);
+      if (cave) {
+        cave.currentAmount += amountCents;
+      }
+      return Promise.resolve({ caveId, newFurniture: [] as FurnitureId[], completed: false });
+    },
+    subscribeUserCaves(_userId: string, cb: (caves: Cave[]) => void) {
+      cb([]);
+      return () => {};
+    },
+  },
 
-export function e2eFeedBear(_bearId: string, amountCents: number) {
-  const xpEarned = Math.floor(amountCents / 100);
-  mockBear.xp += xpEarned;
-  mockBear.level = Math.min(10, mockBear.level + (xpEarned > 500 ? 1 : 0));
-  mockBear.mood = 'ecstatic';
-  return Promise.resolve({
-    newXp: mockBear.xp,
-    newLevel: mockBear.level,
-    leveledUp: false,
-    newAccessories: [],
-    mood: 'ecstatic' as const,
-  });
-}
+  mission: {
+    getOrCreateStreak(_userId: string) {
+      return Promise.resolve(mockStreak);
+    },
+    getTodaysMission(_userId: string, _bearLevel: number) {
+      return Promise.resolve(mockMissions[0]);
+    },
+    completeMission(_userId: string, mission: DailyMission) {
+      mission.completed = true;
+      return Promise.resolve({
+        xpEarned: mission.xpReward,
+        newStreak: mockStreak.current,
+        fireLevel: mockStreak.fireLevel,
+        badgesEarned: [] as BadgeId[],
+      });
+    },
+  },
 
-export function e2eCreateCave(caveId: string, _cave: Record<string, unknown>) {
-  return Promise.resolve(caveId);
-}
-
-export function e2eGetCave(caveId: string) {
-  return mockCaves.find((c) => c.id === caveId) || null;
-}
-
-export function e2eGetCaves(_userId: string) {
-  return Promise.resolve(mockCaves);
-}
-
-export function e2eDepositToCave(caveId: string, amountCents: number) {
-  const cave = mockCaves.find((c) => c.id === caveId);
-  if (cave) {
-    cave.currentAmount += amountCents;
-    return Promise.resolve({ caveId, newFurniture: [], completed: false });
-  }
-  return Promise.resolve({ caveId, newFurniture: [], completed: false });
-}
-
-export function e2eGetOrCreateStreak(_userId: string) {
-  return Promise.resolve(mockStreak);
-}
-
-export function e2eGetTodaysMission(_userId: string, _bearLevel: number) {
-  return Promise.resolve(mockMissions[0]);
-}
-
-export function e2eCompleteMission(_userId: string, mission: Record<string, unknown>) {
-  mission.completed = true;
-  return Promise.resolve({
-    missionId: mission.id as string,
-    xpEarned: mission.xpReward as number,
-    newStreak: mockStreak.current,
-    fireLevel: mockStreak.fireLevel,
-    badgesEarned: [] as BadgeId[],
-    leveledUp: false,
-  });
-}
-
-export function e2eAuthLogin() {}
-export function e2eAuthLogout() {}
-export function e2eAuthSubscribe(cb: (user: { uid: string; email: string }) => void) {
-  cb(e2eUser);
-  return () => {};
-}
+  auth: {
+    register(_email: string, _password: string) {
+      return Promise.resolve(e2eUser);
+    },
+    login(_email: string, _password: string) {
+      return Promise.resolve(e2eUser);
+    },
+    logout() {
+      return Promise.resolve();
+    },
+    onAuthChanged(cb: (user: { uid: string; email: string | null } | null) => void) {
+      cb(e2eUser);
+      return () => {};
+    },
+  },
+};

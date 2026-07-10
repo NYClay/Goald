@@ -52,6 +52,23 @@
 | `getTodaysMission()` | `(userId: string, bearLevel: number) => Promise<DailyMission \| null>` | Fetches or generates today's mission |
 | `completeMission()` | `(userId: string, mission: DailyMission) => Promise<MissionResult>` | Marks mission done, updates streak/fire level, awards badges |
 
+### `src/services/e2eStore.ts`
+
+| Export | Signature | Description |
+|---|---|---|
+| `e2eUser` | `{ uid: string; email: string }` | Mock user for E2E tests |
+| `e2eServices` | `ServiceContract` | Complete in-memory service implementation for E2E |
+
+### `src/types/serviceContract.ts`
+
+| Export | Description |
+|---|---|
+| `BearServiceContract` | Interface for bear CRUD and feed operations |
+| `CaveServiceContract` | Interface for cave CRUD, deposit, and real-time subscriptions |
+| `MissionServiceContract` | Interface for streak, mission fetch, and completion |
+| `AuthServiceContract` | Interface for register, login, logout, auth subscription |
+| `ServiceContract` | Combined interface aggregating all four sub-contracts |
+
 ---
 
 ## utils/
@@ -123,8 +140,8 @@
 
 | Export | File | Signature | Description |
 |---|---|---|---|
-| `BearProvider` | `src/context/BearContext.tsx` | `({ children }) => JSX.Element` | Unified bear/cave/mission state provider |
-| `useBearContext` | `src/context/BearContext.tsx` | `() => BearContextValue` | Full context value (bear, caves, mission, actions) |
+| `AppProvider` | `src/context/AppContext.tsx` | `({ children }) => JSX.Element` | Unified bear/cave/mission state provider |
+| `useAppContext` | `src/context/AppContext.tsx` | `() => AppContextValue` | Full context value (bear, caves, mission, actions) |
 
 ---
 

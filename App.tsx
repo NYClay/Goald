@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
-import { BearProvider } from './src/context/BearContext';
+import { AppProvider } from './src/context/AppContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
@@ -12,10 +12,10 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <NavigationContainer>
-          <BearProvider>
+          <AppProvider>
             <AppNavigator />
             <StatusBar style="auto" />
-          </BearProvider>
+          </AppProvider>
         </NavigationContainer>
       </SafeAreaProvider>
     </GestureHandlerRootView>

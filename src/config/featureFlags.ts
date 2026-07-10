@@ -11,14 +11,16 @@
  */
 
 function envFlag(key: string): boolean {
-  return process.env[key] === 'true';
+  const val = process.env[key];
+  if (val === undefined) return true; // default to enabled when unset
+  return val === 'true';
 }
 
 /** Enable the bear companion feature (default: true). */
-export const FEATURE_BEAR = envFlag('EXPO_PUBLIC_FEATURE_BEAR') || true;
+export const FEATURE_BEAR = envFlag('EXPO_PUBLIC_FEATURE_BEAR');
 
 /** Enable daily missions (default: true). */
-export const FEATURE_MISSIONS = envFlag('EXPO_PUBLIC_FEATURE_MISSIONS') || true;
+export const FEATURE_MISSIONS = envFlag('EXPO_PUBLIC_FEATURE_MISSIONS');
 
 /** Enable cave furnishing (default: true). */
-export const FEATURE_CAVES = envFlag('EXPO_PUBLIC_FEATURE_CAVES') || true;
+export const FEATURE_CAVES = envFlag('EXPO_PUBLIC_FEATURE_CAVES');

@@ -1,7 +1,7 @@
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db, assertFirebaseConfigured } from './firebase';
 import { isE2EMode } from '../config/runtime';
-import { e2eGetOrCreateStreak, e2eGetTodaysMission, e2eCompleteMission } from './e2eStore';
+import { e2eServices } from './e2eStore';
 import { DailyMission, Streak, MissionResult, MissionType, BadgeId, MISSION_XP } from '../types';
 
 const MISSION_TYPES: MissionType[] = ['save_amount', 'round_up', 'skip_purchase', 'custom'];
@@ -41,7 +41,7 @@ export function pickMissionForLevel(level: number): MissionType {
 }
 
 export async function getOrCreateStreak(userId: string): Promise<Streak> {
-  if (isE2EMode) return e2eGetOrCreateStreak(userId);
+  if (isE2EMode) return e2eServices.mission.getOrCreateStreak(userId);
   assertFirebaseConfigured();
 
   const ref = doc(db!, 'streaks', userId);
@@ -65,7 +65,7 @@ export async function getTodaysMission(
   userId: string,
   bearLevel: number
 ): Promise<DailyMission | null> {
-  if (isE2EMode) return e2eGetTodaysMission(userId, bearLevel);
+  if (isE2EMode) return e2eServices.mission.getTodaysMission(userId, bearLevel);
   assertFirebaseConfigured();
 
   const today = new Date().toISOString().split('T')[0];
@@ -95,7 +95,7 @@ export async function completeMission(
   userId: string,
   mission: DailyMission
 ): Promise<MissionResult> {
-  if (isE2EMode) return e2eCompleteMission(userId, mission as unknown as Record<string, unknown>);
+  if (isE2EMode) return e2eServices.mission.completeMission(userId, mission);
   assertFirebaseConfigured();
 
   const today = new Date().toISOString().split('T')[0];

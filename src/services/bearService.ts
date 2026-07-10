@@ -9,13 +9,13 @@ import {
 } from 'firebase/firestore';
 import { db, assertFirebaseConfigured } from './firebase';
 import { isE2EMode } from '../config/runtime';
-import { e2eCreateBear, e2eGetBear, e2eFeedBear } from './e2eStore';
+import { e2eServices } from './e2eStore';
 import { Bear, FeedResult, AccessoryId, Mood, ACCESSORY_UNLOCKS } from '../types';
 
 const BEAR_XP_PER_LEVEL = [0, 100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200];
 
 export async function createBear(userId: string, name: string): Promise<string> {
-  if (isE2EMode) return e2eCreateBear({ id: `bear_${userId}`, userId, name });
+  if (isE2EMode) return e2eServices.bear.createBear(userId, name);
   assertFirebaseConfigured();
 
   const bearId = `bear_${userId}`;
@@ -36,7 +36,7 @@ export async function createBear(userId: string, name: string): Promise<string> 
 }
 
 export async function getBear(bearId: string): Promise<Bear | null> {
-  if (isE2EMode) return e2eGetBear(bearId);
+  if (isE2EMode) return e2eServices.bear.getBear(bearId);
   assertFirebaseConfigured();
 
   const snap = await getDoc(doc(db!, 'bears', bearId));
@@ -48,7 +48,7 @@ export function subscribeBear(bearId: string, cb: (bear: Bear | null) => void): 
   if (isE2EMode) return () => {};
   assertFirebaseConfigured();
 
-  const unsub = onSnapshot(doc(db!, 'bears', bearId), (snap) => {
+  const unsub = onSnapshot(doc(db!, 'bears', bearId), snap => {
     if (snap.exists()) {
       cb({ id: snap.id, ...snap.data() } as Bear);
     } else {
@@ -59,7 +59,7 @@ export function subscribeBear(bearId: string, cb: (bear: Bear | null) => void): 
 }
 
 export async function feedBear(bearId: string, amountCents: number): Promise<FeedResult> {
-  if (isE2EMode) return e2eFeedBear(bearId, amountCents);
+  if (isE2EMode) return e2eServices.bear.feedBear(bearId, amountCents);
   assertFirebaseConfigured();
 
   const bearRef = doc(db!, 'bears', bearId);
@@ -69,7 +69,7 @@ export async function feedBear(bearId: string, amountCents: number): Promise<Fee
   const bear = snap.data() as Bear;
   const xpEarned = Math.floor(amountCents / 100);
   const newXp = bear.xp + xpEarned;
-  const newLevel = Math.min(10, BEAR_XP_PER_LEVEL.findIndex((xp) => xp >= newXp) + 1 || 1);
+  const newLevel = Math.min(10, BEAR_XP_PER_LEVEL.findIndex(xp => xp >= newXp) + 1 || 1);
 
   const leveledUp = newLevel > bear.level;
   const newAccessories: AccessoryId[] = [];
