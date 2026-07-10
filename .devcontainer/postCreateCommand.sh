@@ -9,6 +9,11 @@ echo "🔧 Setting up Goald development environment..."
 # Ensure we're in the workspace
 cd /workspaces/Goald
 
+# Install opencode CLI
+echo "🤖 Installing opencode..."
+curl -fsSL https://opencode.ai/install | bash
+export PATH="$HOME/.opencode/bin:$PATH"
+
 # Install npm dependencies
 echo "📦 Installing npm dependencies..."
 npm ci --prefer-offline --no-audit --no-fund 2>&1 | tail -20

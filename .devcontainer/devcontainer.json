@@ -99,7 +99,7 @@
     "ANDROID_HOME": "/opt/android-sdk"
   },
   "remoteEnv": {
-    "PATH": "${containerEnv:PATH}:/home/node/.npm-global/bin:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:/opt/android-sdk/emulator"
+    "PATH": "${containerEnv:PATH}:/home/node/.npm-global/bin:/home/node/.opencode/bin:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:/opt/android-sdk/emulator"
   },
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {},
