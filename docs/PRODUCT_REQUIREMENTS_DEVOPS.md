@@ -71,10 +71,14 @@ Current status:
 
 ## 2.5 Notifications
 
-- Monthly reminder support.
-- Milestone notifications (25/50/75%).
-- Completion notification.
+**Status: Post-MVP.** Push notifications are explicitly deferred (see `BEAR_MVP_SPEC.md` § OUT, `SHIP_PLAN.md` scope traps). The `notifications` collection exists in `firestore.rules` as a placeholder but is not read or written by any code.
+
+Planned delivery:
+- Firebase Cloud Messaging (FCM) for push notifications.
+- Monthly reminders, milestone notifications (25/50/75%), goal completion.
 - Deduplicate notifications by user/goal/milestone.
+
+**Current implementation:** In-app toast feedback only (success/error). No push notification service configured. See `docs/KNOWN_LIMITATIONS.md` §9.
 
 ## 2.6 Accessibility and UX
 

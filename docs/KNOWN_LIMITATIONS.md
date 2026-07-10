@@ -52,8 +52,13 @@
 
 ## 7. No Offline Persistence
 
-**Impact:** Firestore reads require network. App may show stale data if connection is lost.
-**Mitigation:** Firebase SDK handles basic retry/reconnect. True offline support requires Firestore offline persistence (not yet enabled).
+**Impact:** Firestore reads require network. If connection drops, data goes stale. On mobile, backgrounding the app can cause brief read failures on resume.
+**Current state:** `getFirestore(app)` is called with no settings. The Firebase JS SDK's `enableIndexedDbPersistence()` requires IndexedDB, which is **not available in React Native**. There is no offline-related error handling in any service.
+**Options:**
+1. **Accept the gap** (recommended for MVP). Firebase SDK handles automatic retry/reconnect. Most Expo users are on WiFi/cellular.
+2. **Expo FileSystem caching** — cache key goal data locally for offline read. Adds complexity.
+3. **Firebase native SDK** — would require ejecting from Expo or using a config plugin. Not feasible with Expo managed workflow.
+4. **Firestore Lite SDK** — lighter weight but does not support real-time listeners or offline persistence either.
 
 ---
 
@@ -66,8 +71,9 @@
 
 ## 9. No Notification Delivery
 
-**Impact:** Notifications are defined in the data model but not delivered (no push notification service configured).
-**Planned:** Firebase Cloud Messaging integration in a future phase.
+**Impact:** No push notifications or in-app notification center. The `notifications` Firestore collection is defined in `firestore.rules` but never read or written by any code. In-app toast feedback (success/error) exists but is generic UI, not a notification system.
+**Current state:** `PRODUCT_REQUIREMENTS_DEVOPS.md` §2.5 describes the intended system (monthly reminders, milestone alerts, completion). No `notificationService.ts`, no `useNotifications` hook, no notification UI component exists.
+**Planned:** Firebase Cloud Messaging (FCM) integration. Requires `expo-notifications` plugin, FCM server key setup, and a notification trigger service that creates Firestore documents when milestones are crossed (using `getCrossedMilestones()` from `depositUtils.ts`). Post-MVP — see `SHIP_PLAN.md`.
 
 ---
 

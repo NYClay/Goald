@@ -1,3 +1,53 @@
+/**
+ * Compound interest growth projections.
+ *
+ * ## Formula
+ *
+ * Monthly compounding with end-of-period contributions (ordinary annuity):
+ * ```
+ * monthlyRate = annualInterestRate / 100 / 12
+ * balance[i]  = balance[i-1] × (1 + monthlyRate) + monthlyContribution
+ * ```
+ *
+ * ## Assumptions
+ *
+ * - Interest compounds **monthly** (annual rate ÷ 12). No intra-month compounding.
+ * - Contributions are made at the **end** of each period (post-interest).
+ * - Rate input is a **whole-number percentage** (e.g. `7.5` = 7.5%, not 0.075).
+ * - No taxes, fees, or inflation adjustments.
+ *
+ * ## Units and Integer Arithmetic
+ *
+ * All monetary inputs/outputs are in the **same abstract unit** as the rest of the
+ * app (typically cents/pence as integers). The projection output is a floating-point
+ * number because compounding inherently produces fractional results. The UI should
+ * round display values to the nearest cent/pence using `formatCurrency()`.
+ *
+ * Deposits are recorded in Firestore as integer cents (`currentAmount + depositCents`).
+ * Projections are **forward-looking estimates only** — they do not affect stored balances.
+ *
+ * ## Limits
+ *
+ * - `estimateCompletionMonths` caps iteration at 1200 months (100 years).
+ * - Returns `Infinity` when growth is impossible (no contributions and no interest).
+ *
+ * @module
+ */
+
+/**
+ * Project month-by-month balance growth with monthly compound interest.
+ *
+ * @param currentBalance  - Starting balance (same unit as deposits, e.g. cents)
+ * @param monthlyContribution - Amount added each month after interest
+ * @param annualInterestRate  - Annual rate as whole-number percentage (e.g. 7.5 for 7.5%)
+ * @param months - Number of months to project (0 returns empty array)
+ * @returns Array of length `months` with the balance at the end of each month
+ *
+ * @example
+ * // £1000 starting, £100/month, 12% annual, 3 months
+ * projectGrowth(1000, 100, 12, 3)
+ * // → [1110, 1222.10, 1336.32]
+ */
 export function projectGrowth(
   currentBalance: number,
   monthlyContribution: number,
@@ -14,6 +64,22 @@ export function projectGrowth(
   return balances;
 }
 
+/**
+ * Estimate how many months until the balance reaches the target.
+ *
+ * Uses the same monthly compounding formula as {@link projectGrowth}.
+ * Iterates until `balance >= targetAmount` or the 1200-month safety cap is hit.
+ *
+ * @param currentBalance    - Starting balance
+ * @param targetAmount      - Savings goal to reach
+ * @param monthlyContribution - Amount added each month
+ * @param annualInterestRate  - Annual rate as whole-number percentage
+ * @returns Number of months, or `Infinity` if the target is unreachable
+ *
+ * @example
+ * // £0 starting, £100/month, 0% interest, £1200 target
+ * estimateCompletionMonths(0, 1200, 100, 0) // → 12
+ */
 export function estimateCompletionMonths(
   currentBalance: number,
   targetAmount: number,

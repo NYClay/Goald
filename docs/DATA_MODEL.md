@@ -97,6 +97,10 @@ All document references use the Firestore document reference pattern:
 
 There are no cross-document joins. Each document is self-contained with a `userId` field for security rule enforcement.
 
+### `notifications` (placeholder)
+
+`firestore.rules` defines a `notifications/{notificationId}` collection with owner-scoped CRUD rules. **No service, hook, or UI reads or writes to this collection.** The rules exist as scaffolding for a future push notification system (FCM). See `KNOWN_LIMITATIONS.md` §9.
+
 ---
 
 ## Derived Data
