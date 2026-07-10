@@ -1,4 +1,4 @@
-its# Personas & Product Vision
+# Personas & Product Vision
 
 ## Product Vision — The Emotional Core
 

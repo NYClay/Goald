@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.ts",
   "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "description": "Visual Compounding – save toward goals with animated progress visuals",
   "scripts": {
     "start": "expo start",

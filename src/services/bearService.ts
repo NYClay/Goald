@@ -98,9 +98,3 @@ export async function feedBear(bearId: string, amountCents: number): Promise<Fee
     mood,
   };
 }
-
-export async function renameBear(bearId: string, name: string): Promise<void> {
-  if (isE2EMode) return;
-  assertFirebaseConfigured();
-  await updateDoc(doc(db!, 'bears', bearId), { name, updatedAt: serverTimestamp() });
-}

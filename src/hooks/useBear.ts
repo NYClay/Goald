@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { getBear, subscribeBear, feedBear } from '../services/bearService';
 import { Bear, FeedResult } from '../types';
@@ -20,29 +20,32 @@ export function useBear() {
     setLoading(true);
     const bearId = `bear_${user.uid}`;
 
-    getBear(bearId).then((b) => {
-      setBear(b);
-      setLoading(false);
-    });
-
     return subscribeBear(bearId, (b) => {
       setBear(b);
       setLoading(false);
     });
   }, [user, authLoading]);
 
-  const feed = async (amountCents: number): Promise<FeedResult> => {
-    if (!bear) throw new Error('No bear found');
-    setFeeding(true);
-    try {
-      const result = await feedBear(bear.id, amountCents);
-      return result;
-    } finally {
-      setFeeding(false);
-    }
-  };
+  const feed = useCallback(
+    async (amountCents: number): Promise<FeedResult> => {
+      if (!bear) throw new Error('No bear found');
+      setFeeding(true);
+      try {
+        const result = await feedBear(bear.id, amountCents);
+        return result;
+      } finally {
+        setFeeding(false);
+      }
+    },
+    [bear]
+  );
 
   const displayData = bear ? getBearDisplayData(bear) : null;
+
+  const refetch = useCallback(() => {
+    if (!user) return;
+    getBear(`bear_${user.uid}`).then(setBear);
+  }, [user]);
 
   return {
     bear,
@@ -50,6 +53,6 @@ export function useBear() {
     feeding,
     displayData,
     feed,
-    refetch: () => user && getBear(`bear_${user.uid}`).then(setBear),
+    refetch,
   };
 }

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, ReactNode } from 'react';
+import { createContext, useContext, useMemo, ReactNode } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useBear } from '../hooks/useBear';
 import { useCaves } from '../hooks/useCaves';

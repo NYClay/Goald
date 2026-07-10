@@ -58,7 +58,7 @@ navigation/  → Stack definitions only. No data calls.
 1. Call Firebase SDK in `screens/` or `components/`
 2. Put business logic in screens — it belongs in `utils/`
 3. Define types inline — all types go in `src/types/index.ts`
-4. Use `any` in catch blocks — use `unknown` and the typed pattern in `src/utils/errors.ts`
+4. Use `any` in catch blocks — use `unknown` and the typed pattern in `src/utils/errorUtils.ts`
 5. Import from `screens/` or `components/` in `services/` or `utils/`
 
 ESLint enforces these. CI fails on violations.
@@ -136,7 +136,7 @@ Run `npm run metrics` for current state.
 ## 10. See Also
 
 - `.github/copilot-instructions.md` — Copilot-specific subset of these rules
-- `.github/agents/` — `@docs-agent`, `@test-agent`, `@review-agent`, `@security-agent`
-- `docs/GOLDEN_PATH.md` — 10-step idea→deploy workflow
-- `docs/PROMPT_LIBRARY.md` — tested prompt templates for every repeating task
-- `docs/AI_POLICY.md` — full AI policy and psychological safety norms
+- `docs/Architecture.md` — layer boundaries and dependency diagram
+- `docs/API_SURFACE.md` — every public service and utility function
+- `docs/DATA_MODEL.md` — Firestore collection structure and paths
+- `docs/KNOWN_LIMITATIONS.md` — known issues and gaps

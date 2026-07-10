@@ -99,9 +99,3 @@ export const animation = {
   spring: { damping: 15, stiffness: 120 },
   bounce: { damping: 12, stiffness: 180 },
 };
-
-export const breakpoints = {
-  sm: 480,
-  md: 768,
-  lg: 1024,
-};

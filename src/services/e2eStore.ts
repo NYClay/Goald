@@ -78,11 +78,6 @@ export function e2eGetBear(_bearId: string) {
   return mockBear;
 }
 
-export function e2eUpdateBear(_bearId: string, updates: Record<string, unknown>) {
-  Object.assign(mockBear, updates);
-  return Promise.resolve();
-}
-
 export function e2eFeedBear(_bearId: string, amountCents: number) {
   const xpEarned = Math.floor(amountCents / 100);
   mockBear.xp += xpEarned;
@@ -95,17 +90,6 @@ export function e2eFeedBear(_bearId: string, amountCents: number) {
     newAccessories: [],
     mood: 'ecstatic' as const,
   });
-}
-
-export function e2eGetBearDisplayData(_bearId: string) {
-  return {
-    size: mockBear.size,
-    level: mockBear.level,
-    xpProgress: 0.5,
-    xpToNext: 100,
-    accessories: mockBear.accessories,
-    mood: mockBear.mood,
-  };
 }
 
 export function e2eCreateCave(caveId: string, _cave: Record<string, unknown>) {
@@ -129,10 +113,6 @@ export function e2eDepositToCave(caveId: string, amountCents: number) {
   return Promise.resolve({ caveId, newFurniture: [], completed: false });
 }
 
-export function e2eGetMissions() {
-  return mockMissions;
-}
-
 export function e2eGetOrCreateStreak(_userId: string) {
   return Promise.resolve(mockStreak);
 }
@@ -151,10 +131,6 @@ export function e2eCompleteMission(_userId: string, mission: Record<string, unkn
     badgesEarned: [] as BadgeId[],
     leveledUp: false,
   });
-}
-
-export function e2eGetStreak() {
-  return mockStreak;
 }
 
 export function e2eAuthLogin() {}

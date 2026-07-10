@@ -76,14 +76,14 @@ Current status:
 - Completion notification.
 - Deduplicate notifications by user/goal/milestone.
 
-## 2.6 Visual Compounding Build Requirement
+## 2.6 Accessibility and UX
 
 - For each goal theme, render a full final image baseline at low opacity.
 - As progress increases, reveal full-opacity area continuously according to current progress ratio.
 - Contributions of any size must visibly increase revealed area.
 - For home/house goals, reveal sequence must reflect build stages: land -> foundation -> walls -> roof -> landscaping.
 
-## 2.6 Accessibility and UX
+## 2.7 Accessibility and UX
 
 - Interactive controls must expose accessibility labels.
 - Async actions must show loading and disabled states.

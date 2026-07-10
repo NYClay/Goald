@@ -1,5 +1,5 @@
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, assertFirebaseConfigured } from './firebase';
 import { isE2EMode } from '../config/runtime';
 import { e2eGetOrCreateStreak, e2eGetTodaysMission, e2eCompleteMission } from './e2eStore';
 import { DailyMission, Streak, MissionResult, MissionType, BadgeId, MISSION_XP } from '../types';
@@ -42,6 +42,7 @@ function pickMissionForLevel(level: number): MissionType {
 
 export async function getOrCreateStreak(userId: string): Promise<Streak> {
   if (isE2EMode) return e2eGetOrCreateStreak(userId);
+  assertFirebaseConfigured();
 
   const ref = doc(db!, 'streaks', userId);
   const snap = await getDoc(ref);
@@ -65,6 +66,7 @@ export async function getTodaysMission(
   bearLevel: number
 ): Promise<DailyMission | null> {
   if (isE2EMode) return e2eGetTodaysMission(userId, bearLevel);
+  assertFirebaseConfigured();
 
   const today = new Date().toISOString().split('T')[0];
   const ref = doc(db!, 'missions', `${userId}_${today}`);
@@ -94,6 +96,7 @@ export async function completeMission(
   mission: DailyMission
 ): Promise<MissionResult> {
   if (isE2EMode) return e2eCompleteMission(userId, mission as unknown as Record<string, unknown>);
+  assertFirebaseConfigured();
 
   const today = new Date().toISOString().split('T')[0];
   const streakRef = doc(db!, 'streaks', userId);

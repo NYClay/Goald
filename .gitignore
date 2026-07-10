@@ -47,3 +47,6 @@ GoogleService-Info.plist
 
 # E2E test reports (generated artifacts)
 reports/
+
+# archived source backups
+src_old_*/

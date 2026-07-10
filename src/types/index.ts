@@ -114,23 +114,6 @@ export interface UserStats {
   totalDeposits: number;
 }
 
-export interface Achievement {
-  id: BadgeId;
-  userId: string;
-  earnedAt?: Timestamp;
-}
-
-export interface UserProfile {
-  userId: string;
-  bearId: string;
-  caveIds: string[];
-  streak: Streak;
-  achievements: BadgeId[];
-  totalDeposits: number;
-  totalXp: number;
-  createdAt: Timestamp;
-}
-
 export interface FeedResult {
   newXp: number;
   newLevel: number;

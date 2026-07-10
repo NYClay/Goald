@@ -51,6 +51,7 @@ export async function logout(): Promise<void> {
     e2eAuthLogout();
     return;
   }
+  assertFirebaseConfigured();
   await signOut(auth!);
 }
 
@@ -58,5 +59,6 @@ export function onAuthChanged(cb: (user: User | null) => void): () => void {
   if (isE2EMode) {
     return e2eAuthSubscribe(cb as (user: { uid: string; email: string }) => void);
   }
+  assertFirebaseConfigured();
   return onAuthStateChanged(auth!, cb);
 }

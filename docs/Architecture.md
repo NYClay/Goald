@@ -33,6 +33,10 @@ utils/       → Pure functions. Stateless business logic.
 types/       → Shared TypeScript types. (src/types/index.ts)
                MUST NOT: import from anywhere.
 
+context/     → React Context providers. Compose hooks into unified state.
+               MAY import: hooks/, types/
+               MUST NOT: call Firebase SDK, contain business logic.
+
 config/      → Feature flags, environment config, runtime constants.
                MAY import: types/
                MUST NOT: contain business logic.
@@ -54,6 +58,7 @@ flowchart TD
     services --> utils
     screens --> utils
     components --> utils
+    context --> hooks
     utils --> types
     hooks --> types
     services --> types
@@ -73,7 +78,8 @@ flowchart TD
 | services | `src/services/goalService.ts` | All Firestore goal reads/writes |
 | utils | `src/utils/compoundInterest.ts` | Pure growth projection functions |
 | types | `src/types/index.ts` | Goal, Deposit, UserStats interfaces |
-| config | `src/config/featureFlags.ts` | Runtime feature flags with remote override |
+| context | `src/context/BearContext.tsx` | Unified bear/cave/mission state provider |
+| config | `src/config/featureFlags.ts` | Runtime feature flags |
 
 ## ESLint Configuration
 

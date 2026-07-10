@@ -11,7 +11,7 @@ import {
   serverTimestamp,
   Timestamp,
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, assertFirebaseConfigured } from './firebase';
 import { isE2EMode } from '../config/runtime';
 import { Cave, CAVE_FURNITURE, FurnitureId } from '../types';
 import { e2eCreateCave, e2eGetCave, e2eGetCaves, e2eDepositToCave } from './e2eStore';
@@ -30,6 +30,7 @@ export async function createCave(
   };
 
   if (isE2EMode) return e2eCreateCave(caveId, cave);
+  assertFirebaseConfigured();
 
   await setDoc(doc(db!, 'caves', caveId), cave);
   return caveId;
@@ -37,6 +38,7 @@ export async function createCave(
 
 export async function getCave(caveId: string): Promise<Cave | null> {
   if (isE2EMode) return e2eGetCave(caveId);
+  assertFirebaseConfigured();
 
   const snap = await getDoc(doc(db!, 'caves', caveId));
   if (!snap.exists()) return null;
@@ -45,6 +47,7 @@ export async function getCave(caveId: string): Promise<Cave | null> {
 
 export async function getUserCaves(userId: string): Promise<Cave[]> {
   if (isE2EMode) return e2eGetCaves(userId);
+  assertFirebaseConfigured();
 
   const q = query(collection(db!, 'caves'), where('userId', '==', userId));
   const snap = await getDocs(q);
@@ -56,6 +59,7 @@ export function subscribeUserCaves(userId: string, cb: (caves: Cave[]) => void):
     cb([]);
     return () => {};
   }
+  assertFirebaseConfigured();
   const q = query(collection(db!, 'caves'), where('userId', '==', userId));
   return onSnapshot(q, (snap) => {
     cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Cave));
@@ -67,6 +71,7 @@ export async function depositToCave(
   amountCents: number
 ): Promise<{ caveId: string; newFurniture: FurnitureId[]; completed: boolean }> {
   if (isE2EMode) return e2eDepositToCave(caveId, amountCents);
+  assertFirebaseConfigured();
 
   const ref = doc(db!, 'caves', caveId);
   const snap = await getDoc(ref);
@@ -92,9 +97,4 @@ export async function depositToCave(
   });
 
   return { caveId, newFurniture, completed };
-}
-
-export async function renameCave(caveId: string, name: string): Promise<void> {
-  if (isE2EMode) return;
-  await updateDoc(doc(db!, 'caves', caveId), { name, updatedAt: serverTimestamp() });
 }
