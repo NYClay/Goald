@@ -23,10 +23,17 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID ?? '',
 };
 
-const app = isE2EMode ? undefined : initializeApp(firebaseConfig);
+let app: FirebaseApp | undefined;
+let auth: Auth | undefined;
+let db: Firestore | undefined;
 
-export const auth = isE2EMode ? undefined : getAuth(app!);
-export const db = isE2EMode ? undefined : getFirestore(app!);
+if (!isE2EMode) {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+}
+
+export { app, auth, db };
 export default app;
 
 export function assertFirebaseConfigured() {

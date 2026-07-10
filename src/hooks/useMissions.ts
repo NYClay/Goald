@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { getOrCreateStreak, getTodaysMission, completeMission } from '../services/missionService';
-import { DailyMission, Streak, MissionProgress, Bear } from '../types';
+import { DailyMission, Streak, MissionResult, Bear } from '../types';
 
 export function useMissions(bear: Bear | null) {
   const { user, loading: authLoading } = useAuth();
   const [mission, setMission] = useState<DailyMission | null>(null);
   const [streak, setStreak] = useState<Streak>({
+    userId: '',
     current: 0,
     longest: 0,
     lastMissionDate: '',
@@ -26,12 +27,12 @@ export function useMissions(bear: Bear | null) {
     getTodaysMission(user.uid, bear.level).then(setMission);
   }, [user, authLoading, bear?.level]);
 
-  const complete = async (): Promise<MissionProgress> => {
+  const complete = async (): Promise<MissionResult> => {
     if (!mission || mission.completed || !user) throw new Error('Cannot complete mission');
     setCompleting(true);
     try {
       const result = await completeMission(user.uid, mission);
-      setStreak(result.streak);
+      setStreak({ ...streak, current: result.newStreak, fireLevel: result.fireLevel });
       setMission({ ...mission, completed: true });
       return result;
     } finally {

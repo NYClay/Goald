@@ -3,6 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal, Platform } f
 import { Bear, FeedResult } from '../types';
 import { colors, spacing, radius, typography, shadows, animation } from '../config/theme';
 
+const FW = {
+  regular: '400',
+  medium: '500',
+  semibold: '600',
+  bold: '700',
+  extrabold: '800',
+};
+
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -162,7 +170,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: typography.sizes.xl,
-    fontWeight: typography.weights.bold,
+    fontWeight: '700',
     color: colors.text.ink,
     fontFamily: typography.fontFamilies.display,
   },
@@ -176,7 +184,7 @@ const styles = StyleSheet.create({
   },
   closeText: {
     fontSize: 18,
-    fontWeight: typography.weights.bold,
+    fontWeight: '700',
     color: colors.text.muted,
   },
   bearPreview: {
@@ -200,7 +208,7 @@ const styles = StyleSheet.create({
   },
   amountLabel: {
     fontSize: typography.sizes.base,
-    fontWeight: typography.weights.medium,
+    fontWeight: '500',
     color: colors.text.muted,
     marginBottom: spacing(2),
   },
@@ -209,7 +217,7 @@ const styles = StyleSheet.create({
   },
   amountValue: {
     fontSize: 42,
-    fontWeight: typography.weights.extrabold,
+    fontWeight: '800',
     color: colors.text.ink,
     fontFamily: typography.fontFamilies.mono,
   },
@@ -261,7 +269,7 @@ const styles = StyleSheet.create({
   },
   presetText: {
     fontSize: 13,
-    fontWeight: typography.weights.semibold,
+    fontWeight: '600',
     color: colors.text.muted,
   },
   presetTextActive: {
@@ -281,7 +289,7 @@ const styles = StyleSheet.create({
   },
   feedBtnText: {
     fontSize: typography.sizes.lg,
-    fontWeight: typography.weights.bold,
+    fontWeight: '700',
     color: colors.text.onHoney,
     fontFamily: typography.fontFamilies.display,
   },
@@ -294,19 +302,19 @@ const styles = StyleSheet.create({
   },
   resultTitle: {
     fontSize: typography.sizes.xl,
-    fontWeight: typography.weights.bold,
+    fontWeight: '700',
     color: colors.accent.moss,
     fontFamily: typography.fontFamilies.display,
   },
   resultXp: {
     fontSize: typography.sizes.lg,
-    fontWeight: typography.weights.semibold,
+    fontWeight: '600',
     color: colors.text.ink,
     marginTop: spacing(1),
   },
   resultLevel: {
     fontSize: typography.sizes.base,
-    fontWeight: typography.weights.medium,
+    fontWeight: '500',
     color: colors.accent.honey,
     marginTop: spacing(0.5),
   },

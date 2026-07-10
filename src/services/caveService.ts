@@ -7,11 +7,13 @@ import {
   collection,
   query,
   where,
+  onSnapshot,
   serverTimestamp,
+  Timestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { isE2EMode } from '../config/runtime';
-import { Cave, CAVE_FURNITURE, CaveTheme } from '../types';
+import { Cave, CAVE_FURNITURE, FurnitureId, CaveTheme } from '../types';
 import { e2eCreateCave, e2eGetCave, e2eGetCaves, e2eDepositToCave } from './e2eStore';
 
 export async function createCave(
@@ -24,19 +26,19 @@ export async function createCave(
     userId,
     currentAmount: 0,
     furniture: [],
-    createdAt: serverTimestamp(),
+    createdAt: serverTimestamp() as Timestamp,
   };
 
   if (isE2EMode) return e2eCreateCave(caveId, cave);
 
-  await setDoc(doc(db, 'caves', caveId), cave);
+  await setDoc(doc(db!, 'caves', caveId), cave);
   return caveId;
 }
 
 export async function getCave(caveId: string): Promise<Cave | null> {
   if (isE2EMode) return e2eGetCave(caveId);
 
-  const snap = await getDoc(doc(db, 'caves', caveId));
+  const snap = await getDoc(doc(db!, 'caves', caveId));
   if (!snap.exists()) return null;
   return { id: snap.id, ...snap.data() } as Cave;
 }
@@ -44,17 +46,17 @@ export async function getCave(caveId: string): Promise<Cave | null> {
 export async function getUserCaves(userId: string): Promise<Cave[]> {
   if (isE2EMode) return e2eGetCaves(userId);
 
-  const q = query(collection(db, 'caves'), where('userId', '==', userId));
+  const q = query(collection(db!, 'caves'), where('userId', '==', userId));
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Cave);
 }
 
 export function subscribeUserCaves(userId: string, cb: (caves: Cave[]) => void): () => void {
   if (isE2EMode) {
-    cb([]); // E2E handled differently
+    cb([]);
     return () => {};
   }
-  const q = query(collection(db, 'caves'), where('userId', '==', userId));
+  const q = query(collection(db!, 'caves'), where('userId', '==', userId));
   return onSnapshot(q, (snap) => {
     cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Cave));
   });
@@ -63,10 +65,10 @@ export function subscribeUserCaves(userId: string, cb: (caves: Cave[]) => void):
 export async function depositToCave(
   caveId: string,
   amountCents: number
-): Promise<{ caveId: string; newFurniture: string[]; completed: boolean }> {
+): Promise<{ caveId: string; newFurniture: FurnitureId[]; completed: boolean }> {
   if (isE2EMode) return e2eDepositToCave(caveId, amountCents);
 
-  const ref = doc(db, 'caves', caveId);
+  const ref = doc(db!, 'caves', caveId);
   const snap = await getDoc(ref);
   if (!snap.exists()) throw new Error('Cave not found');
 
@@ -76,7 +78,7 @@ export async function depositToCave(
   const completed = newAmount >= cave.targetAmount && !cave.completedAt;
 
   const furniture = CAVE_FURNITURE[cave.theme];
-  const newFurniture: string[] = [];
+  const newFurniture: FurnitureId[] = [];
   const newCount = Math.min(furniture.length, Math.floor(progress * furniture.length));
   for (let i = cave.furniture.length; i < newCount; i++) {
     newFurniture.push(furniture[i]);
@@ -94,5 +96,5 @@ export async function depositToCave(
 
 export async function renameCave(caveId: string, name: string): Promise<void> {
   if (isE2EMode) return;
-  await updateDoc(doc(db, 'caves', caveId), { name, updatedAt: serverTimestamp() });
+  await updateDoc(doc(db!, 'caves', caveId), { name, updatedAt: serverTimestamp() });
 }

@@ -5,9 +5,8 @@ import {
   doc,
   getDoc,
   onSnapshot,
-  query,
-  where,
   serverTimestamp,
+  Timestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { isE2EMode } from '../config/runtime';
@@ -18,22 +17,13 @@ import {
   e2eFeedBear,
   e2eGetBearDisplayData,
 } from './e2eStore';
-import { Bear, FeedResult, getBearDisplayData } from '../types';
+import { Bear, FeedResult, AccessoryId, Mood, ACCESSORY_UNLOCKS } from '../types';
+import { getBearDisplayData } from '../types';
 
 const BEAR_XP_PER_LEVEL = [0, 100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200];
-const ACCESSORY_UNLOCKS: Record<number, string[]> = {
-  2: ['scarf'],
-  3: ['glasses'],
-  4: ['party_hat'],
-  6: ['sunglasses'],
-  7: ['backpack'],
-  8: ['crown'],
-  9: [],
-  10: [],
-};
 
 export async function createBear(userId: string, name: string): Promise<string> {
-  if (isE2EMode) return e2eCreateBear({ userId, name });
+  if (isE2EMode) return e2eCreateBear({ id: `bear_${userId}`, userId, name });
 
   const bearId = `bear_${userId}`;
   const bear: Omit<Bear, 'id'> = {
@@ -44,18 +34,18 @@ export async function createBear(userId: string, name: string): Promise<string> 
     size: 'cub',
     accessories: [],
     mood: 'hungry',
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
+    createdAt: serverTimestamp() as Timestamp,
+    updatedAt: serverTimestamp() as Timestamp,
   };
 
-  await addDoc(collection(db, 'bears'), { ...bear, id: bearId });
+  await addDoc(collection(db!, 'bears'), { ...bear, id: bearId });
   return bearId;
 }
 
 export async function getBear(bearId: string): Promise<Bear | null> {
   if (isE2EMode) return e2eGetBear(bearId);
 
-  const snap = await getDoc(doc(db, 'bears', bearId));
+  const snap = await getDoc(doc(db!, 'bears', bearId));
   if (!snap.exists()) return null;
   return { id: snap.id, ...snap.data() } as Bear;
 }
@@ -63,7 +53,7 @@ export async function getBear(bearId: string): Promise<Bear | null> {
 export function subscribeBear(bearId: string, cb: (bear: Bear | null) => void): () => void {
   if (isE2EMode) return () => {};
 
-  const unsub = onSnapshot(doc(db, 'bears', bearId), (snap) => {
+  const unsub = onSnapshot(doc(db!, 'bears', bearId), (snap) => {
     if (snap.exists()) {
       cb({ id: snap.id, ...snap.data() } as Bear);
     } else {
@@ -76,7 +66,7 @@ export function subscribeBear(bearId: string, cb: (bear: Bear | null) => void): 
 export async function feedBear(bearId: string, amountCents: number): Promise<FeedResult> {
   if (isE2EMode) return e2eFeedBear(bearId, amountCents);
 
-  const bearRef = doc(db, 'bears', bearId);
+  const bearRef = doc(db!, 'bears', bearId);
   const snap = await getDoc(bearRef);
   if (!snap.exists()) throw new Error('Bear not found');
 
@@ -86,7 +76,7 @@ export async function feedBear(bearId: string, amountCents: number): Promise<Fee
   const newLevel = Math.min(10, BEAR_XP_PER_LEVEL.findIndex((xp) => xp >= newXp) + 1 || 1);
 
   const leveledUp = newLevel > bear.level;
-  const newAccessories: string[] = [];
+  const newAccessories: AccessoryId[] = [];
   const oldLevel = bear.level;
 
   for (let lvl = oldLevel + 1; lvl <= newLevel; lvl++) {
@@ -94,7 +84,7 @@ export async function feedBear(bearId: string, amountCents: number): Promise<Fee
     newAccessories.push(...unlocks);
   }
 
-  const mood = xpEarned > 200 ? 'ecstatic' : xpEarned > 100 ? 'happy' : 'content';
+  const mood: Mood = xpEarned > 200 ? 'ecstatic' : xpEarned > 100 ? 'happy' : 'content';
 
   await updateDoc(bearRef, {
     xp: newXp,
@@ -115,7 +105,7 @@ export async function feedBear(bearId: string, amountCents: number): Promise<Fee
 
 export async function renameBear(bearId: string, name: string): Promise<void> {
   if (isE2EMode) return;
-  await updateDoc(doc(db, 'bears', bearId), { name, updatedAt: serverTimestamp() });
+  await updateDoc(doc(db!, 'bears', bearId), { name, updatedAt: serverTimestamp() });
 }
 
 export function getBearSize(level: number): 'cub' | 'grown' | 'giant' {
@@ -136,9 +126,9 @@ export function getXpProgress(level: number, xp: number): number {
   return Math.min((xp - currentThreshold) / (nextThreshold - currentThreshold), 1);
 }
 
-export function getAvailableAccessories(bear: Bear): string[] {
+export function getAvailableAccessories(bear: Bear): AccessoryId[] {
   const unlocked = new Set(bear.accessories);
-  const available: string[] = [];
+  const available: AccessoryId[] = [];
 
   for (let lvl = 1; lvl <= bear.level; lvl++) {
     (ACCESSORY_UNLOCKS[lvl] || []).forEach((a) => {
@@ -150,7 +140,8 @@ export function getAvailableAccessories(bear: Bear): string[] {
 }
 
 export function calculateMood(bear: Bear): Bear['mood'] {
-  const hoursSinceFeed = bear.lastFedAt ? (Date.now() - bear.lastFedAt.toMillis()) / 36e5 : 999;
+  const lastFedAt = bear.updatedAt?.toMillis?.() ?? Date.now();
+  const hoursSinceFeed = (Date.now() - lastFedAt) / 36e5;
 
   if (bear.xp === 0 && bear.level === 1) return 'hungry';
   if (hoursSinceFeed < 12) return 'ecstatic';
@@ -159,6 +150,6 @@ export function calculateMood(bear: Bear): Bear['mood'] {
   return 'hungry';
 }
 
-export function getBearDisplayData(bear: Bear) {
+export function getBearDisplayDataFromBear(bear: Bear) {
   return getBearDisplayData(bear);
 }

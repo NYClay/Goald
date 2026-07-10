@@ -147,8 +147,8 @@ export default function BearCharacter({ bear, size = 160, onPress, animated = tr
                   left: '50%',
                   top: '50%',
                   transform: [
-                    { translateX: `${pos.x * bearSize}px` },
-                    { translateY: `${pos.y * bearSize}px` },
+                    { translateX: pos.x * bearSize },
+                    { translateY: pos.y * bearSize },
                     { rotate: pos.rotate },
                   ],
                 },

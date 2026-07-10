@@ -1,21 +1,20 @@
 import 'react-native-gesture-handler';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import AppNavigator from './src/navigation/AppNavigator';
-import ErrorBoundary from './src/components/ErrorBoundary';
-import ToastHost from './src/components/ToastHost';
-import { initializeGlobalErrorTracking } from './src/services/errorTrackingService';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BearProvider } from './src/context/BearContext';
+import DashboardScreen from './src/screens/DashboardScreen';
 
 export default function App() {
-  useEffect(() => {
-    initializeGlobalErrorTracking();
-  }, []);
-
   return (
-    <ErrorBoundary>
-      <AppNavigator />
-      <ToastHost />
-      <StatusBar style="auto" />
-    </ErrorBoundary>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <BearProvider>
+          <DashboardScreen />
+          <StatusBar style="auto" />
+        </BearProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

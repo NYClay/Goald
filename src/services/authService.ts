@@ -4,6 +4,7 @@ import {
   signOut,
   onAuthStateChanged,
   User,
+  Auth,
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, assertFirebaseConfigured } from './firebase';
@@ -15,11 +16,11 @@ export async function register(email: string, password: string): Promise<User> {
 
   if (isE2EMode) {
     e2eAuthLogin();
-    return e2eUser;
+    return e2eUser as unknown as User;
   }
 
-  const cred = await createUserWithEmailAndPassword(auth, email, password);
-  await setDoc(doc(db, 'bears', `bear_${cred.user.uid}`), {
+  const cred = await createUserWithEmailAndPassword(auth!, email, password);
+  await setDoc(doc(db!, 'bears', `bear_${cred.user.uid}`), {
     id: `bear_${cred.user.uid}`,
     userId: cred.user.uid,
     name: 'Honey',
@@ -39,10 +40,10 @@ export async function login(email: string, password: string): Promise<User> {
 
   if (isE2EMode) {
     e2eAuthLogin();
-    return e2eUser;
+    return e2eUser as unknown as User;
   }
 
-  const cred = await signInWithEmailAndPassword(auth, email, password);
+  const cred = await signInWithEmailAndPassword(auth!, email, password);
   return cred.user;
 }
 
@@ -51,12 +52,12 @@ export async function logout(): Promise<void> {
     e2eAuthLogout();
     return;
   }
-  await signOut(auth);
+  await signOut(auth!);
 }
 
 export function onAuthChanged(cb: (user: User | null) => void): () => void {
   if (isE2EMode) {
-    return e2eAuthSubscribe(cb);
+    return e2eAuthSubscribe(cb as (user: { uid: string; email: string }) => void);
   }
-  return onAuthStateChanged(auth, cb);
+  return onAuthStateChanged(auth!, cb);
 }

@@ -37,9 +37,17 @@ export type FurnitureId =
   | 'tub'
   | 'sauna'
   | 'stones'
-  | 'zen_garden';
+  | 'zen_garden'
+  | 'bookshelf'
+  | 'cat';
 
 export type BadgeId =
+  | 'first_deposit'
+  | 'halfway'
+  | 'completed'
+  | 'streak_3'
+  | 'streak_6'
+  | 'multi_goal'
   | 'first_feed'
   | 'week_streak'
   | 'furnished_cave'
@@ -52,6 +60,8 @@ export type BadgeId =
   | 'mission_master'
   | 'completionist'
   | 'early_bird';
+
+export { Timestamp };
 
 export interface Bear {
   id: string;
@@ -95,6 +105,13 @@ export interface Streak {
   longest: number;
   lastMissionDate: string;
   fireLevel: 0 | 1 | 2 | 3;
+}
+
+export interface UserStats {
+  currentStreak: number;
+  lastDepositMonth: string;
+  badges: BadgeId[];
+  totalDeposits: number;
 }
 
 export interface Achievement {
@@ -202,3 +219,24 @@ export function xpForNextLevel(level: number): number {
   if (level >= 10) return 0;
   return LEVEL_XP[level + 1];
 }
+
+export function getBearDisplayData(bear: Bear) {
+  const currentLevelXp = bear.xp - (bear.level > 1 ? LEVEL_XP[bear.level - 1] : 0);
+  const nextLevelXp = xpForNextLevel(bear.level);
+  const progress = nextLevelXp > 0 ? currentLevelXp / nextLevelXp : 1;
+  return {
+    size: bear.size,
+    level: bear.level,
+    xpProgress: progress,
+    xpToNext: nextLevelXp - currentLevelXp,
+    accessories: bear.accessories,
+    mood: bear.mood,
+  };
+}
+
+export function getCaveProgress(cave: Cave): number {
+  if (cave.targetAmount <= 0) return 0;
+  return Math.min(cave.currentAmount / cave.targetAmount, 1);
+}
+
+export type MissionProgress = MissionResult;

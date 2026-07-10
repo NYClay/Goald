@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    container_name: goald-devcontainer
+    user: node
+    environment:
+      - NODE_ENV=development
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+      - REACT_NATIVE_PACKAGER_HOSTNAME=0.0.0.0
+      - EXPO_PUBLIC_E2E_MODE=false
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ..:/workspaces/Goald:cached
+      - goald-node-modules:/workspaces/Goald/node_modules
+      - goald-expo-cache:/home/node/.expo
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8081:8081"    # Expo Dev Server
+      - "8082:8082"    # Expo Dev Server (alt)
+      - "19000:19000"  # Expo DevTools
+      - "19001:19001"  # Expo DevTools (alt)
+      - "19002:19002"  # Expo Web
+      - "19006:19006"  # Expo Web (alt)
+      - "8080:8080"    # Web Preview
+      - "5554:5554"    # Android Emulator
+      - "5555:5555"    # ADB
+    working_dir: /workspaces/Goald
+    command: sleep infinity
+    networks:
+      - goald-network
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+
+  # Optional: Android Emulator service (for running Android emulator in container)
+  # Uncomment to use Android emulator in container
+  # android-emulator:
+  #   image: budtmo/docker-android:api_34
+  #   container_name: goald-android-emulator
+  #   environment:
+  #     - DEVICE=Samsung Galaxy S23
+  #     - API=34
+  #     - ARCH=x86_64
+  #   ports:
+  #     - "5555:5555"
+  #     - "5554:5554"
+  #     - "6080:6080"  # noVNC
+  #   volumes:
+  #     - android-emulator-data:/data
+  #   privileged: true
+  #   networks:
+  #     - goald-network
+
+volumes:
+  goald-node-modules:
+  goald-expo-cache:
+  # android-emulator-data:
+
+networks:
+  goald-network:
+    driver: bridge

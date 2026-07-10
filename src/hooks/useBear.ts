@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
-import { getBear, subscribeBear, feedBear, getBearDisplayData } from '../services/bearService';
+import { getBear, subscribeBear, feedBear } from '../services/bearService';
 import { Bear, FeedResult, getBearDisplayData as getDisplayData } from '../types';
 
 export function useBear() {

@@ -2,7 +2,7 @@ import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firest
 import { db } from './firebase';
 import { isE2EMode } from '../config/runtime';
 import { e2eGetOrCreateStreak, e2eGetTodaysMission, e2eCompleteMission } from './e2eStore';
-import { DailyMission, Streak, MissionProgress, MissionType } from '../types';
+import { DailyMission, Streak, MissionResult, MissionType, BadgeId } from '../types';
 
 const MISSION_TYPES: MissionType[] = ['save_amount', 'round_up', 'skip_purchase', 'custom'];
 const MISSION_XP: Record<MissionType, number> = {
@@ -49,17 +49,18 @@ function pickMissionForLevel(level: number): MissionType {
 export async function getOrCreateStreak(userId: string): Promise<Streak> {
   if (isE2EMode) return e2eGetOrCreateStreak(userId);
 
-  const ref = doc(db, 'streaks', userId);
+  const ref = doc(db!, 'streaks', userId);
   const snap = await getDoc(ref);
 
   if (!snap.exists()) {
     const streak: Streak = {
+      userId,
       current: 0,
       longest: 0,
       lastMissionDate: '',
       fireLevel: 0,
     };
-    await setDoc(ref, { ...streak, userId, updatedAt: serverTimestamp() });
+    await setDoc(ref, { ...streak, updatedAt: serverTimestamp() });
     return streak;
   }
   return snap.data() as Streak;
@@ -72,7 +73,7 @@ export async function getTodaysMission(
   if (isE2EMode) return e2eGetTodaysMission(userId, bearLevel);
 
   const today = new Date().toISOString().split('T')[0];
-  const ref = doc(db, 'missions', `${userId}_${today}`);
+  const ref = doc(db!, 'missions', `${userId}_${today}`);
   const snap = await getDoc(ref);
 
   if (snap.exists()) return snap.data() as DailyMission;
@@ -97,15 +98,15 @@ export async function getTodaysMission(
 export async function completeMission(
   userId: string,
   mission: DailyMission
-): Promise<MissionProgress> {
-  if (isE2EMode) return e2eCompleteMission(userId, mission);
+): Promise<MissionResult> {
+  if (isE2EMode) return e2eCompleteMission(userId, mission as unknown as Record<string, unknown>);
 
   const today = new Date().toISOString().split('T')[0];
-  const streakRef = doc(db, 'streaks', userId);
+  const streakRef = doc(db!, 'streaks', userId);
   const streakSnap = await getDoc(streakRef);
   const streak = streakSnap.exists()
     ? (streakSnap.data() as Streak)
-    : { current: 0, longest: 0, lastMissionDate: '', fireLevel: 0 };
+    : { userId, current: 0, longest: 0, lastMissionDate: '', fireLevel: 0 };
 
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -120,7 +121,7 @@ export async function completeMission(
 
   const fireLevel = newStreak >= 7 ? 3 : newStreak >= 3 ? 2 : newStreak > 0 ? 1 : 0;
 
-  await updateDoc(doc(db, 'missions', mission.id), {
+  await updateDoc(doc(db!, 'missions', mission.id), {
     completed: true,
     completedAt: serverTimestamp(),
   });
@@ -133,7 +134,7 @@ export async function completeMission(
     updatedAt: serverTimestamp(),
   });
 
-  const badges: string[] = [];
+  const badges: BadgeId[] = [];
   if (newStreak === 7) badges.push('week_streak');
   if (newStreak === 30) badges.push('iron_gut');
 
@@ -145,7 +146,7 @@ export async function completeMission(
   };
 }
 
-export async function getMissionProgress(userId: string): Promise<DailyMission[]> {
+export async function getMissionProgress(_userId: string): Promise<DailyMission[]> {
   if (isE2EMode) return [];
   return [];
 }
