@@ -6,7 +6,7 @@ import { DailyMission, Streak, MissionResult, MissionType, BadgeId, MISSION_XP }
 
 const MISSION_TYPES: MissionType[] = ['save_amount', 'round_up', 'skip_purchase', 'custom'];
 
-function getMissionTarget(level: number, type: MissionType): number {
+export function getMissionTarget(level: number, type: MissionType): number {
   const base = Math.min(500 + level * 100, 2000);
   switch (type) {
     case 'save_amount':
@@ -20,7 +20,7 @@ function getMissionTarget(level: number, type: MissionType): number {
   }
 }
 
-function pickMissionForLevel(level: number): MissionType {
+export function pickMissionForLevel(level: number): MissionType {
   const weights: Record<MissionType, number> = {
     save_amount: 0.5,
     round_up: 0.2,
