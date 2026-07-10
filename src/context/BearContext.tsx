@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, useMemo, ReactNode } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useBear } from '../hooks/useBear';
 import { useCaves } from '../hooks/useCaves';
@@ -11,8 +11,8 @@ import {
   FeedResult,
   CaveProgress,
   MissionResult,
-  getBearDisplayData,
 } from '../types';
+import { getBearDisplayData } from '../utils/bearUtils';
 
 interface BearContextValue {
   bear: Bear | null;
@@ -31,26 +31,42 @@ const BearContext = createContext<BearContextValue | null>(null);
 
 export function BearProvider({ children }: { children: ReactNode }) {
   const { loading: authLoading } = useAuth();
-  const { bear, loading: bearLoading, feed, displayData } = useBear();
-  const { caves, loading: cavesLoading, deposit } = useCaves();
+  const { bear, loading: bearLoading, feed, displayData, refetch: refetchBear } = useBear();
+  const { caves, loading: cavesLoading, deposit, refetch: refetchCaves } = useCaves();
   const { mission, streak, loading: missionsLoading, complete } = useMissions(bear);
 
   const loading = authLoading || bearLoading || cavesLoading || missionsLoading;
 
-  const value = {
-    bear,
-    displayData,
-    caves,
-    mission,
-    streak,
-    loading,
-    feed,
-    deposit,
-    completeMission: complete,
-    refetch: () => {
-      // trigger refetch
-    },
-  };
+  const value = useMemo<BearContextValue>(
+    () => ({
+      bear,
+      displayData,
+      caves,
+      mission,
+      streak,
+      loading,
+      feed,
+      deposit,
+      completeMission: complete,
+      refetch: () => {
+        refetchBear();
+        refetchCaves();
+      },
+    }),
+    [
+      bear,
+      displayData,
+      caves,
+      mission,
+      streak,
+      loading,
+      feed,
+      deposit,
+      complete,
+      refetchBear,
+      refetchCaves,
+    ]
+  );
 
   return <BearContext.Provider value={value}>{children}</BearContext.Provider>;
 }

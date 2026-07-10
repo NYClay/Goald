@@ -17,9 +17,9 @@ Backend: Firebase Auth (email/password) + Cloud Firestore.
 
 - **Framework:** React Native via Expo (SDK 52), targeting web + iOS + Android
 - **Language:** TypeScript with `strict: true` — never use `any` or `@ts-ignore` without a comment
-- **Navigation:** React Navigation (native stack + bottom tabs)
+- **Navigation:** React Navigation (planned — not yet implemented)
 - **Backend:** Firebase Auth + Firestore (via Firebase JS SDK v11)
-- **Testing:** Jest (unit), Cucumber + Playwright (E2E BDD)
+- **Testing:** Node.js test runner (node:test + tsx) (unit), Cucumber + Playwright (E2E BDD)
 - **Linting:** ESLint with `@typescript-eslint`, `react-hooks`, `react-native` plugins
 - **Formatting:** Prettier (singleQuote, semi, printWidth 100)
 
@@ -42,7 +42,7 @@ Backend: Firebase Auth (email/password) + Cloud Firestore.
 - Screens call hooks for data and services for writes — they do not call Firestore directly
 - All async actions must set a `loading` state and disable interactive elements while loading
 - Errors are shown via `Alert.alert(title, getErrorMessage(error))` OR inline field errors (preferred for form validation)
-- No inline `StyleSheet` magic numbers — use tokens from `src/theme/tokens.ts`
+- No inline `StyleSheet` magic numbers — use tokens from `src/config/theme.ts`
 
 ### Components (`src/components/`)
 - Components are presentational — no Firestore calls, no navigation logic
@@ -83,7 +83,7 @@ For bug fixes: write a test that reproduces the bug first, then fix it.
 
 - Never hardcode Firebase credentials — use `EXPO_PUBLIC_FIREBASE_*` env vars
 - Never commit `.env` files — `.env.example` documents all required variables
-- Never use `catch (e: any)` — use `catch (error: unknown)` and `getErrorMessage(error)`
+- Never use `catch (e: any)` — use `catch (error: unknown)` and `getErrorMessage(error)` from `src/utils/errorUtils.ts`
 - Never call `updateGoalBalance` directly — use the transactional `addDepositAndUpdateBalance`
 - Never set `EXPO_PUBLIC_E2E_MODE=true` in a production environment config
 - Firestore security rules (`firestore.rules`) must be updated when new collections are added
@@ -107,7 +107,7 @@ For bug fixes: write a test that reproduces the bug first, then fix it.
 - ❌ Do not use `console.log` — use `console.warn` or `console.error` sparingly, or remove before PR
 - ❌ Do not put business logic in screens — extract to utils or services
 - ❌ Do not skip writing tests — every exported function needs a test
-- ❌ Do not write a catch block that silently swallows errors — always surface them via Sentry + user message
+- ❌ Do not write a catch block that silently swallows errors — always surface them to the user
 - ❌ Do not create a new button component — use `AppButton`
 - ❌ Do not use `as any` or `as unknown as X` without a comment explaining why
 - ❌ Do not write a Firestore write without checking if a transaction is needed
@@ -123,5 +123,5 @@ For bug fixes: write a test that reproduces the bug first, then fix it.
 - [ ] E2E mode branch added to any new service function
 - [ ] No hardcoded colours or spacing — tokens used
 - [ ] `accessibilityLabel` added to any new interactive element
-- [ ] Sentry `captureException` called in any new catch block
+- [ ] All new catch blocks use `unknown` pattern with `getErrorMessage(error)`
 - [ ] Analytics event tracked for any new user-facing action

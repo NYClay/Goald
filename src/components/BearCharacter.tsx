@@ -8,7 +8,7 @@ import {
   StyleProp,
   ViewStyle,
 } from 'react-native';
-import { Bear, Size, Mood, ACCESSORY_UNLOCKS } from '../types';
+import { Bear, Size, Mood } from '../types';
 import { colors, radius, typography, shadows } from '../config/theme';
 
 interface Props {
@@ -43,7 +43,6 @@ const ACCESSORY_POSITIONS: Record<string, { x: number; y: number; scale: number;
 
 export default function BearCharacter({ bear, size = 160, onPress, animated = true }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
-  const bounce = useRef(new Animated.Value(0)).current;
   const breathe = useRef(new Animated.Value(0)).current;
 
   const bearSize = useMemo(() => SIZE_MAP[bear.size] * (size / 160), [bear.size, size]);
@@ -51,13 +50,15 @@ export default function BearCharacter({ bear, size = 160, onPress, animated = tr
 
   useEffect(() => {
     if (!animated) return;
-    Animated.loop(
+    const anim = Animated.loop(
       Animated.timing(breathe, {
         toValue: 1,
         duration: 3000,
         useNativeDriver: true,
       })
-    ).start();
+    );
+    anim.start();
+    return () => anim.stop();
   }, [animated, breathe]);
 
   const handlePressIn = () => {
@@ -72,23 +73,12 @@ export default function BearCharacter({ bear, size = 160, onPress, animated = tr
     }
   };
 
-  const triggerFeed = useRef(() => {
-    if (animated) {
-      Animated.sequence([
-        Animated.spring(scale, { toValue: 1.1, useNativeDriver: true }),
-        Animated.spring(scale, { toValue: 0.95, useNativeDriver: true }),
-        Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
-      ]).start();
-    }
-  }).current;
-
   const breatheAnim = breathe.interpolate({
     inputRange: [0, 1],
     outputRange: [0, 4],
   });
 
   const furColor = colors.fur.light;
-  const furDark = colors.fur.dark;
   const noseColor = colors.fur.nose;
 
   return (

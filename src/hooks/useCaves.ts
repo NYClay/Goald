@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { getUserCaves, subscribeUserCaves, depositToCave } from '../services/caveService';
-import { Cave, CaveProgress, getCaveProgress } from '../types';
+import { Cave, CaveProgress } from '../types';
+import { getCaveProgress } from '../utils/bearUtils';
 
 export function useCaves() {
   const { user, loading: authLoading } = useAuth();

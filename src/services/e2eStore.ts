@@ -1,12 +1,4 @@
-import {
-  Bear,
-  Streak,
-  DailyMission,
-  MissionResult,
-  FurnitureId,
-  CaveTheme,
-  BadgeId,
-} from '../types';
+import { Bear, Streak, DailyMission, FurnitureId, CaveTheme, BadgeId } from '../types';
 import { Timestamp } from 'firebase/firestore';
 
 const now = Date.now();

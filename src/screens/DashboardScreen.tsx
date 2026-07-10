@@ -4,18 +4,10 @@ import { useBearContext } from '../context/BearContext';
 import BearCharacter from '../components/BearCharacter';
 import FeedModal from '../components/FeedModal';
 import { colors, spacing, radius, typography, shadows } from '../config/theme';
-import { getBearDisplayData } from '../types';
-
-const FW = {
-  regular: '400',
-  medium: '500',
-  semibold: '600',
-  bold: '700',
-  extrabold: '800',
-};
+import { getBearDisplayData, getCaveProgress } from '../utils/bearUtils';
 
 export default function DashboardScreen() {
-  const { bear, caves, mission, streak, loading, feed } = useBearContext();
+  const { bear, caves, mission, streak, loading, feed, completeMission } = useBearContext();
   const [feedModalVisible, setFeedModalVisible] = React.useState(false);
 
   const displayData = bear ? getBearDisplayData(bear) : null;
@@ -77,7 +69,7 @@ export default function DashboardScreen() {
             <Text style={styles.sectionTitle}>📋 Today's Mission</Text>
             <View style={styles.missionCard}>
               <Text style={styles.missionText}>{getMissionText(nextMission)}</Text>
-              <TouchableOpacity style={styles.completeBtn} onPress={() => {}}>
+              <TouchableOpacity style={styles.completeBtn} onPress={() => completeMission()}>
                 <Text style={styles.completeBtnText}>Complete +{nextMission.xpReward} XP</Text>
               </TouchableOpacity>
             </View>
@@ -134,11 +126,6 @@ function getMissionText(mission: { type: string; target: number }): string {
     default:
       return 'Complete a mission';
   }
-}
-
-function getCaveProgress(cave: { targetAmount: number; currentAmount: number }): number {
-  if (cave.targetAmount <= 0) return 0;
-  return Math.min(cave.currentAmount / cave.targetAmount, 1);
 }
 
 const styles = StyleSheet.create({

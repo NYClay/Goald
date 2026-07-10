@@ -1,15 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Modal, Platform } from 'react-native';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Bear, FeedResult } from '../types';
 import { colors, spacing, radius, typography, shadows, animation } from '../config/theme';
-
-const FW = {
-  regular: '400',
-  medium: '500',
-  semibold: '600',
-  bold: '700',
-  extrabold: '800',
-};
+import { getErrorMessage } from '../utils/errorUtils';
 
 interface Props {
   visible: boolean;
@@ -28,7 +21,6 @@ export default function FeedModal({ visible, onClose, onFeed, bear }: Props) {
 
   const scale = useRef(new Animated.Value(0)).current;
   const opacity = useRef(new Animated.Value(0)).current;
-  const honeyDrops = useRef([] as Animated.Value[]).current;
 
   useEffect(() => {
     if (visible) {
@@ -42,30 +34,30 @@ export default function FeedModal({ visible, onClose, onFeed, bear }: Props) {
         Animated.timing(scale, { toValue: 0, duration: animation.fast, useNativeDriver: true }),
       ]).start();
     }
-  }, [visible]);
+  }, [visible, opacity, scale]);
 
   useEffect(() => {
-    if (result) {
-      setShowResult(true);
-      setTimeout(() => {
-        setShowResult(false);
-        setResult(null);
-        onClose();
-      }, 2000);
-    }
-  }, [result]);
+    if (!result) return;
+    setShowResult(true);
+    const timer = setTimeout(() => {
+      setShowResult(false);
+      setResult(null);
+      onClose();
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [result, onClose]);
 
-  const handleFeed = async () => {
+  const handleFeed = useCallback(async () => {
     setLoading(true);
     try {
       const res = await onFeed(amount);
       setResult(res);
     } catch (e) {
-      console.error(e);
+      void getErrorMessage(e);
     } finally {
       setLoading(false);
     }
-  };
+  }, [amount, onFeed]);
 
   const formatAmount = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 

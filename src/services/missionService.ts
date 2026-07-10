@@ -2,15 +2,9 @@ import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firest
 import { db } from './firebase';
 import { isE2EMode } from '../config/runtime';
 import { e2eGetOrCreateStreak, e2eGetTodaysMission, e2eCompleteMission } from './e2eStore';
-import { DailyMission, Streak, MissionResult, MissionType, BadgeId } from '../types';
+import { DailyMission, Streak, MissionResult, MissionType, BadgeId, MISSION_XP } from '../types';
 
 const MISSION_TYPES: MissionType[] = ['save_amount', 'round_up', 'skip_purchase', 'custom'];
-const MISSION_XP: Record<MissionType, number> = {
-  save_amount: 50,
-  round_up: 30,
-  skip_purchase: 40,
-  custom: 60,
-};
 
 function getMissionTarget(level: number, type: MissionType): number {
   const base = Math.min(500 + level * 100, 2000);
@@ -144,9 +138,4 @@ export async function completeMission(
     fireLevel,
     badgesEarned: badges,
   };
-}
-
-export async function getMissionProgress(_userId: string): Promise<DailyMission[]> {
-  if (isE2EMode) return [];
-  return [];
 }

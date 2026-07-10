@@ -27,5 +27,24 @@ service cloud.firestore {
       allow read, update, delete: if isOwner(resource.data.userId);
       allow create: if request.resource != null && isOwner(request.resource.data.userId);
     }
+
+    match /bears/{bearId} {
+      allow read, update, delete: if isOwner(resource.data.userId);
+      allow create: if request.resource != null && isOwner(request.resource.data.userId);
+    }
+
+    match /caves/{caveId} {
+      allow read, update, delete: if isOwner(resource.data.userId);
+      allow create: if request.resource != null && isOwner(request.resource.data.userId);
+    }
+
+    match /streaks/{userId} {
+      allow read, create, update, delete: if isOwner(userId);
+    }
+
+    match /missions/{missionId} {
+      allow read, update, delete: if isOwner(resource.data.userId);
+      allow create: if request.resource != null && isOwner(request.resource.data.userId);
+    }
   }
 }

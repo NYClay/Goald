@@ -77,8 +77,7 @@ flowchart TD
 
 ## ESLint Configuration
 
-Layer boundaries are enforced via `eslint-plugin-import` with `no-restricted-imports` rules.
-See `.eslintrc.js` for the rule configuration.
+Layer boundaries are enforced via `no-restricted-imports` rules in `eslint.config.js`.
 
 **Key rules:**
 - `utils/**` may not import from `services/**`, `hooks/**`, or `screens/**`

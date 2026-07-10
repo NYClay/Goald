@@ -20,8 +20,8 @@ AI is NOT used for: architectural decisions, Firebase security rules without rev
 ## 2. Project Identity
 
 **Product:** Goald — a React Native savings-goal tracker for iOS and Android
-**Stack:** TypeScript · React Native · Expo ~52 · Firebase Auth · Firestore · React Navigation
-**Tests:** Jest · Cucumber + Playwright BDD E2E
+**Stack:** TypeScript · React Native · Expo ~52 · Firebase Auth · Firestore
+**Tests:** Node.js test runner (node:test + tsx) · Cucumber + Playwright BDD E2E
 **Repository:** github.com/deilert00/Goald
 
 ---

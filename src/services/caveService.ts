@@ -13,7 +13,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { isE2EMode } from '../config/runtime';
-import { Cave, CAVE_FURNITURE, FurnitureId, CaveTheme } from '../types';
+import { Cave, CAVE_FURNITURE, FurnitureId } from '../types';
 import { e2eCreateCave, e2eGetCave, e2eGetCaves, e2eDepositToCave } from './e2eStore';
 
 export async function createCave(

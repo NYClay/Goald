@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { getBear, subscribeBear, feedBear } from '../services/bearService';
-import { Bear, FeedResult, getBearDisplayData as getDisplayData } from '../types';
+import { Bear, FeedResult } from '../types';
+import { getBearDisplayData } from '../utils/bearUtils';
 
 export function useBear() {
   const { user, loading: authLoading } = useAuth();
@@ -41,7 +42,7 @@ export function useBear() {
     }
   };
 
-  const displayData = bear ? getDisplayData(bear) : null;
+  const displayData = bear ? getBearDisplayData(bear) : null;
 
   return {
     bear,

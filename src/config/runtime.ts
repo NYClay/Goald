@@ -1,1 +1,10 @@
-export const isE2EMode = process.env.EXPO_PUBLIC_E2E_MODE === 'true';
+const hasFirebaseConfig = [
+  'EXPO_PUBLIC_FIREBASE_API_KEY',
+  'EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN',
+  'EXPO_PUBLIC_FIREBASE_PROJECT_ID',
+  'EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET',
+  'EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID',
+  'EXPO_PUBLIC_FIREBASE_APP_ID',
+].every((k) => !!process.env[k]);
+
+export const isE2EMode = process.env.EXPO_PUBLIC_E2E_MODE === 'true' || !hasFirebaseConfig;
